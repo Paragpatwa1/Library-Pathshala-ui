@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,14 @@ import type { SeatCategory } from "@/types"
 import Link from "next/link"
 
 export default function SelectSeatPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-12 text-muted-foreground">Loading seat selection...</div>}>
+      <SelectSeatContent />
+    </Suspense>
+  )
+}
+
+function SelectSeatContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 

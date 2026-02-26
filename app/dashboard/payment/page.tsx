@@ -1,15 +1,14 @@
 "use client"
 
+import { Suspense, useCallback, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Smartphone, CreditCard, Landmark, ArrowLeft, ArrowRight } from "lucide-react"
+import { Smartphone, CreditCard, Landmark, ArrowLeft, ArrowRight, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useState, useCallback } from "react"
 import { PaymentSummary } from "@/components/payment/PaymentSummary"
 import type { SeatCategory } from "@/types"
 import Link from "next/link"
-import { Loader2 } from "lucide-react"
 
 const paymentMethods = [
   { id: "upi", label: "UPI", icon: Smartphone, description: "You will be redirected to your UPI app to complete payment." },
@@ -24,6 +23,14 @@ function formatDate(dateStr: string) {
 }
 
 export default function PaymentPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-12 text-muted-foreground">Loading payment...</div>}>
+      <PaymentContent />
+    </Suspense>
+  )
+}
+
+function PaymentContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [method, setMethod] = useState("upi")

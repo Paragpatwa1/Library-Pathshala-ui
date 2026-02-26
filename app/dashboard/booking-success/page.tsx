@@ -1,10 +1,19 @@
 "use client"
 
+import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { SuccessCard } from "@/components/booking/SuccessCard"
 import type { SeatCategory } from "@/types"
 
 export default function BookingSuccessPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-12 text-muted-foreground">Loading...</div>}>
+      <BookingSuccessContent />
+    </Suspense>
+  )
+}
+
+function BookingSuccessContent() {
   const searchParams = useSearchParams()
 
   const category = (searchParams.get("category") as SeatCategory) || "Reserved"

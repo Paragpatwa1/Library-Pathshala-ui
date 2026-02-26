@@ -5,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Smartphone, CreditCard, Landmark, ArrowLeft, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { PaymentSummary } from "@/components/payment/PaymentSummary"
 import type { SeatCategory } from "@/types"
 import Link from "next/link"
+import { Loader2 } from "lucide-react"
 
 const paymentMethods = [
   { id: "upi", label: "UPI", icon: Smartphone, description: "You will be redirected to your UPI app to complete payment." },
@@ -26,6 +27,7 @@ export default function PaymentPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [method, setMethod] = useState("upi")
+  const [isProcessing, setIsProcessing] = useState(false)
 
   const category = (searchParams.get("category") as SeatCategory) || "Reserved"
   const seat = Number(searchParams.get("seat")) || 0
@@ -38,16 +40,19 @@ export default function PaymentPage() {
   const formattedStart = formatDate(startDate)
   const formattedEnd = formatDate(endDate)
 
-  function handlePayNow() {
-    const params = new URLSearchParams({
-      category,
-      seat: String(seat),
-      startDate: formattedStart,
-      endDate: formattedEnd,
-      amount: String(finalAmount),
-    })
-    router.push(`/dashboard/booking-success?${params.toString()}`)
-  }
+  const handleDummyPayment = useCallback(() => {
+    setIsProcessing(true)
+    setTimeout(() => {
+      const params = new URLSearchParams({
+        category,
+        seat: String(seat),
+        startDate: formattedStart,
+        endDate: formattedEnd,
+        amount: String(finalAmount),
+      })
+      router.push(`/dashboard/booking-success?${params.toString()}`)
+    }, 800)
+  }, [category, seat, formattedStart, formattedEnd, finalAmount, router])
 
   return (
     <div className="flex flex-col gap-6">
@@ -128,10 +133,18 @@ export default function PaymentPage() {
             </div>
 
             <Button
-              onClick={handlePayNow}
+              onClick={handleDummyPayment}
+              disabled={isProcessing}
               className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold text-base py-6"
             >
-              Pay Now - {"₹"}{finalAmount.toLocaleString("en-IN")}
+              {isProcessing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>{"Pay Now - ₹"}{finalAmount.toLocaleString("en-IN")}</>
+              )}
             </Button>
 
             <p className="text-center text-xs text-muted-foreground">

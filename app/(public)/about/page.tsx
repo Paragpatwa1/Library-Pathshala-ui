@@ -191,7 +191,7 @@ export default function AboutPage() {
             size="lg"
             className="mt-6 bg-accent text-accent-foreground hover:bg-accent/90 px-8 text-base font-semibold"
           >
-            <Link href="/pricing">Book Your Seat</Link>
+            <Link href="/seat-plans">Book Your Seat</Link>
           </Button>
         </div>
       </section>

@@ -34,7 +34,7 @@ export function HeroSection() {
             size="lg"
             className="bg-accent text-accent-foreground hover:bg-accent/90 px-8 text-base font-semibold shadow-lg"
           >
-            <Link href="/pricing">Book Your Seat</Link>
+            <Link href="/seat-plans">Book Your Seat</Link>
           </Button>
           <Badge className="bg-accent/20 text-accent border-accent/30 px-4 py-1.5 text-sm font-semibold">
             20% OFF for New Members

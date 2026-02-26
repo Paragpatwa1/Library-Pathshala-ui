@@ -99,7 +99,7 @@ export default function StudentDashboard() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/dashboard/bookings">
+        <Link href="/dashboard/my-bookings">
           <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 hover:border-accent/30">
             <CardContent className="flex flex-col items-center gap-3 py-8">
               <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-accent/10">

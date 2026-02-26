@@ -26,7 +26,7 @@ export function Footer() {
               {[
                 { href: "/about", label: "About" },
                 { href: "/facilities", label: "Facilities" },
-                { href: "/pricing", label: "Seat Plans" },
+                { href: "/seat-plans", label: "Seat Plans" },
                 { href: "/contact", label: "Contact" },
               ].map((link) => (
                 <Link

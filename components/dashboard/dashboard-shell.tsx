@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button"
 const sidebarLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/book-seat", label: "Book Seat", icon: CalendarCheck },
-  { href: "/dashboard/bookings", label: "My Bookings", icon: ListOrdered },
+  { href: "/dashboard/my-bookings", label: "My Bookings", icon: ListOrdered },
   { href: "/dashboard/payment", label: "Payment", icon: CreditCard },
   { href: "/dashboard/profile", label: "Profile", icon: UserCircle },
 ]

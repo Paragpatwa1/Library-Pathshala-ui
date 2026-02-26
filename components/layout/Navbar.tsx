@@ -11,7 +11,7 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
   { href: "/facilities", label: "Facilities" },
-  { href: "/pricing", label: "Seat Plans" },
+  { href: "/seat-plans", label: "Seat Plans" },
   { href: "/contact", label: "Contact" },
 ]
 

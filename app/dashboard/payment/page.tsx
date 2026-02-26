@@ -1,84 +1,96 @@
 "use client"
 
+import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import {
-  ShieldCheck,
-  Smartphone,
-  CreditCard,
-  Landmark,
-  CalendarDays,
-  Armchair,
-  Tag,
-} from "lucide-react"
+import { Smartphone, CreditCard, Landmark, ArrowLeft, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
+import { PaymentSummary } from "@/components/payment/PaymentSummary"
+import type { SeatCategory } from "@/types"
+import Link from "next/link"
 
 const paymentMethods = [
-  { id: "upi", label: "UPI", icon: Smartphone },
-  { id: "card", label: "Card", icon: CreditCard },
-  { id: "netbanking", label: "Netbanking", icon: Landmark },
+  { id: "upi", label: "UPI", icon: Smartphone, description: "You will be redirected to your UPI app to complete payment." },
+  { id: "card", label: "Card", icon: CreditCard, description: "Enter your card details to proceed with payment." },
+  { id: "netbanking", label: "Net Banking", icon: Landmark, description: "Select your bank to proceed with netbanking payment." },
 ]
 
+function formatDate(dateStr: string) {
+  if (!dateStr) return ""
+  const d = new Date(dateStr)
+  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+}
+
 export default function PaymentPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [method, setMethod] = useState("upi")
+
+  const category = (searchParams.get("category") as SeatCategory) || "Reserved"
+  const seat = Number(searchParams.get("seat")) || 0
+  const startDate = searchParams.get("startDate") || ""
+  const endDate = searchParams.get("endDate") || ""
+  const total = Number(searchParams.get("total")) || 1200
+  const finalAmount = Number(searchParams.get("final")) || 960
+
+  const discountPercent = 20
+  const formattedStart = formatDate(startDate)
+  const formattedEnd = formatDate(endDate)
+
+  function handlePayNow() {
+    const params = new URLSearchParams({
+      category,
+      seat: String(seat),
+      startDate: formattedStart,
+      endDate: formattedEnd,
+      amount: String(finalAmount),
+    })
+    router.push(`/dashboard/booking-success?${params.toString()}`)
+  }
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-foreground font-[family-name:var(--font-poppins)]">
-        Secure Payment
-      </h1>
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" asChild>
+          <Link href="/dashboard/book-seat" aria-label="Go back">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+        </Button>
+        <h1 className="text-2xl font-bold text-foreground font-[family-name:var(--font-poppins)]">
+          Secure Payment
+        </h1>
+      </div>
+
+      {/* Step indicator */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs font-semibold">
+          1
+        </span>
+        <span className="text-accent font-medium">Plan & Dates</span>
+        <ArrowRight className="h-4 w-4" />
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs font-semibold">
+          2
+        </span>
+        <span className="text-accent font-medium">Select Seat</span>
+        <ArrowRight className="h-4 w-4" />
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+          3
+        </span>
+        <span className="font-medium text-foreground">Payment</span>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Booking Summary */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <ShieldCheck className="h-5 w-5 text-accent" />
-              Booking Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <div className="flex items-center gap-3 rounded-xl border border-border p-4">
-              <Armchair className="h-6 w-6 text-accent" />
-              <div>
-                <p className="text-xs text-muted-foreground">Seat Type</p>
-                <p className="font-semibold text-foreground">Reserved Seat</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl border border-border p-4">
-              <CalendarDays className="h-6 w-6 text-accent" />
-              <div>
-                <p className="text-xs text-muted-foreground">Duration</p>
-                <p className="font-semibold text-foreground">
-                  01 Mar 2026 — 31 Mar 2026
-                </p>
-              </div>
-            </div>
-            <Separator />
-            <div className="flex flex-col gap-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-medium text-foreground">{"₹"}1,200</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Discount (20%)</span>
-                <span className="font-medium text-accent">-{"₹"}240</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between">
-                <span className="font-semibold text-foreground">Total</span>
-                <span className="text-2xl font-bold text-foreground">{"₹"}960</span>
-              </div>
-              <Badge className="self-start bg-accent/10 text-accent border-accent/20">
-                <Tag className="mr-1 h-3 w-3" />
-                20% Discount Applied
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
+        <PaymentSummary
+          seatCategory={category}
+          seatNumber={seat}
+          startDate={formattedStart || "01 Mar 2026"}
+          endDate={formattedEnd || "31 Mar 2026"}
+          subtotal={total}
+          discountPercent={discountPercent}
+          finalAmount={finalAmount}
+        />
 
         {/* Payment Method */}
         <Card>
@@ -112,16 +124,14 @@ export default function PaymentPage() {
             </div>
 
             <div className="rounded-xl border border-border bg-secondary p-4 text-center text-sm text-muted-foreground">
-              {method === "upi" &&
-                "You will be redirected to your UPI app to complete payment."}
-              {method === "card" &&
-                "Enter your card details to proceed with payment."}
-              {method === "netbanking" &&
-                "Select your bank to proceed with netbanking payment."}
+              {paymentMethods.find((pm) => pm.id === method)?.description}
             </div>
 
-            <Button className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold text-base py-6">
-              Pay Now - {"₹"}960
+            <Button
+              onClick={handlePayNow}
+              className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold text-base py-6"
+            >
+              Pay Now - {"₹"}{finalAmount.toLocaleString("en-IN")}
             </Button>
 
             <p className="text-center text-xs text-muted-foreground">

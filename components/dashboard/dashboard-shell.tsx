@@ -68,7 +68,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                  pathname === link.href
+                  (pathname === link.href || (link.href !== "/dashboard" && pathname.startsWith(link.href)))
                     ? "bg-sidebar-accent text-sidebar-primary"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                 )}

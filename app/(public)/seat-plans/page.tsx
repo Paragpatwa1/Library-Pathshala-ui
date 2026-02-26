@@ -140,7 +140,7 @@ export default function PricingPage() {
                         : "bg-primary text-primary-foreground hover:bg-primary/90"
                     )}
                   >
-                    <Link href="/register">Book Now</Link>
+                    <Link href="/dashboard/book-seat">Book Now</Link>
                   </Button>
                 </div>
               </div>

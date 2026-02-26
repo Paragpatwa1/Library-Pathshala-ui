@@ -36,6 +36,7 @@ export default function AboutPage() {
             alt="Pathshala Library"
             fill
             className="object-cover opacity-15"
+            priority
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80" />

@@ -50,6 +50,7 @@ export default function StudentDashboard() {
               alt="Library"
               fill
               className="object-cover rounded-xl"
+              priority
             />
           </div>
         </div>

@@ -39,19 +39,80 @@ export default function PaymentContent() {
   const formattedStart = formatDate(startDate)
   const formattedEnd = formatDate(endDate)
 
-  const handleDummyPayment = useCallback(() => {
+  const handlePayment = useCallback(async () => {
+  try {
     setIsProcessing(true)
-    setTimeout(() => {
-      const params = new URLSearchParams({
-        category,
-        seat: String(seat),
-        startDate: formattedStart,
-        endDate: formattedEnd,
-        amount: String(finalAmount),
-      })
-      router.push(`/dashboard/booking-success?${params.toString()}`)
-    }, 800)
-  }, [category, seat, formattedStart, formattedEnd, finalAmount, router])
+
+    const token = localStorage.getItem("token")
+
+    // 1️⃣ Create Razorpay Order from Backend
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/payment/create-order`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          amount: finalAmount,
+        }),
+      }
+    )
+
+    const order = await res.json()
+
+    if (!order.id) {
+      alert("Failed to create payment order")
+      setIsProcessing(false)
+      return
+    }
+
+    // 2️⃣ Open Razorpay
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      amount: order.amount,
+      currency: "INR",
+      order_id: order.id,
+      name: "Pathshala Library",
+      description: "Seat Booking Payment",
+      handler: async function (response: any) {
+        // 3️⃣ Verify Payment on Backend
+        await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/payment/verify`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(response),
+          }
+        )
+
+        const params = new URLSearchParams({
+          category,
+          seat: String(seat),
+          startDate: formattedStart,
+          endDate: formattedEnd,
+          amount: String(finalAmount),
+        })
+
+        router.push(`/dashboard/booking-success?${params.toString()}`)
+      },
+      theme: {
+        color: "#f97316",
+      },
+    }
+
+    const rzp = new (window as any).Razorpay(options)
+    rzp.open()
+  } catch (err) {
+    console.error(err)
+    alert("Payment failed")
+  } finally {
+    setIsProcessing(false)
+  }
+}, [category, seat, formattedStart, formattedEnd, finalAmount, router])
 
   return (
     <div className="flex flex-col gap-6">
@@ -132,7 +193,7 @@ export default function PaymentContent() {
             </div>
 
             <Button
-              onClick={handleDummyPayment}
+             onClick={handlePayment}
               disabled={isProcessing}
               className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold text-base py-6"
             >

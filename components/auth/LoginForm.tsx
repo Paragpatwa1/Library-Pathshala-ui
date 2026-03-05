@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -7,65 +8,136 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
+import { login } from "@/lib/auth"
 
 export function LoginForm() {
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+
     e.preventDefault()
-    // Would handle login here
+
+    const form = new FormData(e.currentTarget)
+
+    const email = form.get("email") as string
+    const password = form.get("password") as string
+
+    try {
+
+      setLoading(true)
+
+      await login(email, password)
+
+      alert("Login successful")
+
+      window.location.href = "/dashboard"
+
+    } catch (err) {
+
+      console.error(err)
+
+      alert("Invalid email or password")
+
+    } finally {
+
+      setLoading(false)
+
+    }
+
   }
 
   return (
+
     <div className="rounded-2xl border border-border bg-card p-8 shadow-lg">
+
       <div className="mb-6 text-center">
+
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
           <BookOpen className="h-6 w-6 text-accent" />
         </div>
+
         <h1 className="mt-4 text-2xl font-bold text-foreground font-[family-name:var(--font-poppins)]">
           Login to Your Account
         </h1>
+
         <p className="mt-1 text-sm text-muted-foreground">
           Welcome back to Pathshala Library
         </p>
+
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" name="email" type="email" placeholder="you@example.com" required />
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            required
+          />
         </div>
+
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" name="password" type="password" placeholder="Enter your password" required />
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Enter your password"
+            required
+          />
         </div>
+
         <div className="flex items-center justify-between">
+
           <div className="flex items-center gap-2">
             <Checkbox id="remember" />
-            <Label htmlFor="remember" className="text-sm font-normal text-muted-foreground cursor-pointer">
+            <Label
+              htmlFor="remember"
+              className="text-sm font-normal text-muted-foreground cursor-pointer"
+            >
               Remember me
             </Label>
           </div>
+
           <Link
             href="#"
             className="text-sm font-medium text-accent hover:underline"
           >
             Forgot password?
           </Link>
+
         </div>
+
         <Button
           type="submit"
+          disabled={loading}
           className="mt-2 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold"
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </Button>
+
       </form>
 
       <div className="my-5 flex items-center gap-3">
+
         <Separator className="flex-1" />
         <span className="text-xs text-muted-foreground">or</span>
         <Separator className="flex-1" />
-      </div>
 
-      <Button variant="outline" className="w-full font-medium">
+      </div>
+<Button
+  variant="outline"
+  className="w-full font-medium"
+  onClick={() =>
+    (window.location.href =
+      "https://pathshala-backend-production.up.railway.app/auth/google")
+  }
+>
+
         <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
           <path
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
@@ -84,15 +156,25 @@ export function LoginForm() {
             fill="#EA4335"
           />
         </svg>
+
         Sign in with Google
+
       </Button>
 
       <p className="mt-5 text-center text-sm text-muted-foreground">
+
         {"Don't have an account?"}{" "}
-        <Link href="/register" className="font-medium text-accent hover:underline">
+
+        <Link
+          href="/register"
+          className="font-medium text-accent hover:underline"
+        >
           Sign up
         </Link>
+
       </p>
+
     </div>
+
   )
 }

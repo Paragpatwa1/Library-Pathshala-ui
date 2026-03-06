@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function AuthSuccess() {
+function AuthSuccessContent() {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -14,7 +14,15 @@ export default function AuthSuccess() {
       localStorage.setItem("token", token);
       router.push("/dashboard");
     }
-  }, []);
+  }, [params, router]);
 
   return <p>Logging in...</p>;
+}
+
+export default function AuthSuccess() {
+  return (
+    <Suspense fallback={<p>Logging in...</p>}>
+      <AuthSuccessContent />
+    </Suspense>
+  );
 }

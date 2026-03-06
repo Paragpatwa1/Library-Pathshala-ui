@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { PaymentSummary } from "@/components/payment/PaymentSummary"
 import type { SeatCategory } from "@/types"
 import Link from "next/link"
+import { loadRazorpayScript } from "@/lib/razorpay";
 
 const paymentMethods = [
   { id: "upi", label: "UPI", icon: Smartphone, description: "You will be redirected to your UPI app to complete payment." },
@@ -39,20 +40,17 @@ export default function PaymentContent() {
   const formattedStart = formatDate(startDate)
   const formattedEnd = formatDate(endDate)
 
-  const handlePayment = useCallback(async () => {
+const handlePayment = useCallback(async () => {
   try {
+
     setIsProcessing(true)
 
-    const token = localStorage.getItem("token")
-
-    // 1️⃣ Create Razorpay Order from Backend
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/payment/create-order`,
+      `${process.env.NEXT_PUBLIC_API_URL}/payment/create-order`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           amount: finalAmount,
@@ -62,13 +60,13 @@ export default function PaymentContent() {
 
     const order = await res.json()
 
-    if (!order.id) {
-      alert("Failed to create payment order")
-      setIsProcessing(false)
+    const razorpayLoaded = await loadRazorpay()
+
+    if (!razorpayLoaded) {
+      alert("Razorpay SDK failed to load")
       return
     }
 
-    // 2️⃣ Open Razorpay
     const options = {
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
       amount: order.amount,
@@ -76,16 +74,24 @@ export default function PaymentContent() {
       order_id: order.id,
       name: "Pathshala Library",
       description: "Seat Booking Payment",
+
       handler: async function (response: any) {
-        // 3️⃣ Verify Payment on Backend
+
         await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/payment/verify`,
+          `${process.env.NEXT_PUBLIC_API_URL}/payment/verify`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify(response),
+          }
+        )
+
+        await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/seats/${seat}/toggle`,
+          {
+            method: "PATCH",
           }
         )
 
@@ -99,6 +105,7 @@ export default function PaymentContent() {
 
         router.push(`/dashboard/booking-success?${params.toString()}`)
       },
+
       theme: {
         color: "#f97316",
       },
@@ -106,6 +113,7 @@ export default function PaymentContent() {
 
     const rzp = new (window as any).Razorpay(options)
     rzp.open()
+
   } catch (err) {
     console.error(err)
     alert("Payment failed")

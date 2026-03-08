@@ -18,21 +18,19 @@ export default function MyBookingsPage() {
 
   const [bookings,setBookings] = useState<any[]>([])
 
-  useEffect(()=>{
+ useEffect(()=>{
 
-    const token = localStorage.getItem("token")
+const token = localStorage.getItem("token")
 
-    if(!token) return
+fetch(`${process.env.NEXT_PUBLIC_API_URL}/booking/my-bookings`,{
+headers:{
+Authorization:`Bearer ${token}`
+}
+})
+.then(res=>res.json())
+.then(data=>setBookings(data))
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/booking/my`,{
-      headers:{
-        Authorization:`Bearer ${token}`
-      }
-    })
-    .then(res=>res.json())
-    .then(data=>setBookings(data))
-
-  },[])
+},[])
 
   return (
     <div className="flex flex-col gap-6">

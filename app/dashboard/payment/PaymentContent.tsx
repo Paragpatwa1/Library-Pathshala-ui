@@ -32,11 +32,11 @@ export default function PaymentContent() {
   const [isProcessing, setIsProcessing] = useState(false)
 
   const category = (searchParams.get("category") as SeatCategory) || "Reserved"
-  const seat = Number(searchParams.get("seat")) || 0
+  const seat = Number(searchParams.get("seat"))
   const startDate = searchParams.get("startDate") || ""
   const endDate = searchParams.get("endDate") || ""
-  const total = Number(searchParams.get("total")) || 1200
-  const finalAmount = Number(searchParams.get("final")) || 960
+  const total = Number(searchParams.get("total") ?? 0)
+const finalAmount = Number(searchParams.get("final") ?? 0)
 
   const discountPercent = 20
   const formattedStart = formatDate(startDate)

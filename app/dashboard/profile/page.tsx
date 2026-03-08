@@ -11,11 +11,9 @@ import { Separator } from "@/components/ui/separator"
 
 import {
   UserCircle,
-  Mail,
   Phone,
   MapPin,
   Lock,
-  Armchair,
   Save,
 } from "lucide-react"
 
@@ -38,6 +36,10 @@ export default function ProfilePage() {
     .then(data=>setUser(data))
 
   },[])
+
+  if(!user){
+    return <p>Loading...</p>
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -78,12 +80,12 @@ export default function ProfilePage() {
 
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Phone className="h-4 w-4 text-accent" />
-                9876543210
+                {user?.phone || "Not added"}
               </div>
 
               <div className="flex items-center gap-2 text-muted-foreground">
                 <MapPin className="h-4 w-4 text-accent" />
-                India
+                {user?.address || "India"}
               </div>
 
             </div>

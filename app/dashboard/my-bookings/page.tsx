@@ -2,163 +2,169 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+Table,
+TableBody,
+TableCell,
+TableHead,
+TableHeader,
+TableRow,
 } from "@/components/ui/table"
-import { RefreshCw, XCircle } from "lucide-react"
 
 export default function MyBookingsPage() {
 
-  const [bookings,setBookings] = useState<any[]>([])
+const [bookings,setBookings] = useState<any[]>([])
+const [loading,setLoading] = useState(true)
 
- useEffect(()=>{
+useEffect(()=>{
+
+async function loadBookings(){
+
+try{
 
 const token = localStorage.getItem("token")
 
-fetch(`${process.env.NEXT_PUBLIC_API_URL}/booking/my-bookings`,{
+if(!token){
+setLoading(false)
+return
+}
+
+const res = await fetch(
+`${process.env.NEXT_PUBLIC_API_URL}/booking/my`,
+{
 headers:{
 Authorization:`Bearer ${token}`
 }
-})
-.then(res=>res.json())
-.then(data=>setBookings(data))
+}
+)
+
+const data = await res.json()
+
+if(Array.isArray(data)){
+setBookings(data)
+}else{
+setBookings([])
+}
+
+}catch(err){
+
+console.error("Booking fetch error",err)
+setBookings([])
+
+}
+
+setLoading(false)
+
+}
+
+loadBookings()
 
 },[])
 
-  return (
-    <div className="flex flex-col gap-6">
+return (
 
-      <h1 className="text-2xl font-bold text-foreground font-[family-name:var(--font-poppins)]">
-        My Bookings
-      </h1>
+<div className="flex flex-col gap-6">
 
-      <Card>
+<h1 className="text-2xl font-bold">
+My Bookings
+</h1>
 
-        <CardHeader>
-          <CardTitle className="text-lg">
-            Booking History
-          </CardTitle>
-        </CardHeader>
+<Card>
 
-        <CardContent className="overflow-x-auto">
+<CardHeader>
+<CardTitle>
+Booking History
+</CardTitle>
+</CardHeader>
 
-          <Table>
+<CardContent>
 
-            <TableHeader>
+<Table>
 
-              <TableRow>
-                <TableHead>Seat</TableHead>
-                <TableHead>Start Date</TableHead>
-                <TableHead>End Date</TableHead>
-                <TableHead>Payment</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
+<TableHeader>
 
-            </TableHeader>
+<TableRow>
+<TableHead>Seat</TableHead>
+<TableHead>Start</TableHead>
+<TableHead>End</TableHead>
+<TableHead>Payment</TableHead>
+</TableRow>
 
-            <TableBody>
+</TableHeader>
 
-              {bookings.map((booking)=>{
+<TableBody>
 
-                const status =
-                  booking.paymentStatus === "CONFIRMED"
-                    ? "Active"
-                    : "Pending"
+{loading && (
 
-                return (
+<TableRow>
+<TableCell colSpan={4} className="text-center py-10">
+Loading...
+</TableCell>
+</TableRow>
 
-                  <TableRow key={booking.id}>
+)}
 
-                    <TableCell className="font-medium">
-                      {booking.seat?.category} Seat
-                    </TableCell>
+{!loading && bookings.length === 0 && (
 
-                    <TableCell>
-                      {new Date(booking.startDate).toLocaleDateString()}
-                    </TableCell>
+<TableRow>
+<TableCell colSpan={4} className="text-center py-10 text-muted-foreground">
+No bookings yet
+</TableCell>
+</TableRow>
 
-                    <TableCell>
-                      {new Date(booking.endDate).toLocaleDateString()}
-                    </TableCell>
+)}
 
-                    <TableCell>
+{bookings.map((b:any)=>(
 
-                      <Badge
-                        className={
-                          booking.paymentStatus === "CONFIRMED"
-                            ? "bg-accent/10 text-accent border-accent/20"
-                            : "bg-destructive/10 text-destructive border-destructive/20"
-                        }
-                      >
-                        {booking.paymentStatus === "CONFIRMED" ? "Paid" : "Pending"}
-                      </Badge>
+<TableRow key={b.id}>
 
-                    </TableCell>
+<TableCell>
+{b.seat?.category} #{b.seat?.seatNumber}
+</TableCell>
 
-                    <TableCell>
+<TableCell>
+{b.startDate
+? new Date(b.startDate).toLocaleDateString()
+: "-"}
+</TableCell>
 
-                      <Badge
-                        className={
-                          status === "Active"
-                            ? "bg-accent/10 text-accent border-accent/20"
-                            : "bg-muted text-muted-foreground"
-                        }
-                      >
-                        {status}
-                      </Badge>
+<TableCell>
+{b.endDate
+? new Date(b.endDate).toLocaleDateString()
+: "-"}
+</TableCell>
 
-                    </TableCell>
+<TableCell>
 
-                    <TableCell className="text-right">
+<Badge
+className={
+b.paymentStatus === "CONFIRMED"
+? "bg-green-100 text-green-700"
+: "bg-yellow-100 text-yellow-700"
+}
+>
 
-                      <div className="flex items-center justify-end gap-2">
+{b.paymentStatus}
 
-                        {status === "Active" && (
+</Badge>
 
-                          <>
-                            <Button size="sm" variant="outline" className="gap-1">
-                              <RefreshCw className="h-3 w-3" />
-                              Renew
-                            </Button>
+</TableCell>
 
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="gap-1 border-destructive/30 text-destructive hover:bg-destructive/10"
-                            >
-                              <XCircle className="h-3 w-3" />
-                              Cancel
-                            </Button>
-                          </>
+</TableRow>
 
-                        )}
+))}
 
-                      </div>
+</TableBody>
 
-                    </TableCell>
+</Table>
 
-                  </TableRow>
+</CardContent>
 
-                )
+</Card>
 
-              })}
+</div>
 
-            </TableBody>
+)
 
-          </Table>
-
-        </CardContent>
-
-      </Card>
-
-    </div>
-  )
 }

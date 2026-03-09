@@ -100,7 +100,7 @@ export default function ManageBookingsPage() {
                           : booking.status === "Completed"
                           ? "bg-muted text-muted-foreground"
                           : "bg-destructive/10 text-destructive border-destructive/20"
-                      }
+                    v  }
                     >
                       {booking.status}
                     </Badge>
